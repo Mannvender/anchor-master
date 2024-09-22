@@ -3,10 +3,10 @@ import {
   ConnectionProvider,
   WalletProvider,
   useWallet,
-  WalletModalProvider,
 } from "@solana/wallet-adapter-react";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { PhantomWalletAdapter } from "@solana/wallet-adapter-wallets";
+import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import {
   Connection,
   PublicKey,
@@ -15,7 +15,9 @@ import {
 } from "@solana/web3.js";
 import "./styles.css"; // Import the CSS file for styling
 
-const network = WalletAdapterNetwork.Mainnet;
+// const network = WalletAdapterNetwork.Mainnet;
+// const connection = new Connection(network);
+const network = "https://api.devnet.solana.com";
 const connection = new Connection(network);
 
 const App = () => {
@@ -33,7 +35,7 @@ const App = () => {
 };
 
 const TransferComponent = () => {
-  const { connected, wallet } = useWallet();
+  const { connected, wallet, connect, disconnect, select } = useWallet();
   const [amount, setAmount] = useState("");
   const [transactionStatus, setTransactionStatus] = useState("");
 
@@ -68,6 +70,15 @@ const TransferComponent = () => {
     }
   };
 
+  const handleConnect = async () => {
+    try {
+      await select("Phantom");
+      await connect();
+    } catch (error) {
+      console.error("Failed to connect wallet:", error);
+    }
+  };
+
   return (
     <div className="retro-container">
       <h1>Transfer SPL Tokens</h1>
@@ -78,7 +89,8 @@ const TransferComponent = () => {
         placeholder="Amount in SOL"
       />
       <button onClick={handleTransfer}>Transfer</button>
-      {!connected && <button onClick={wallet.connect}>Connect Wallet</button>}
+      {!connected && <button onClick={handleConnect}>Connect Wallet</button>}
+      {connected && <button onClick={disconnect}>Disconnect Wallet</button>}
       {transactionStatus && <p>{transactionStatus}</p>}
     </div>
   );
